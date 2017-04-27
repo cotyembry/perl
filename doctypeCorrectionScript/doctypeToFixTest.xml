@@ -1,0 +1,933 @@
+
+<CSP name="MARSRVU2.CSP" application="/csp/cah/" default="1"><![CDATA[
+<!DOCTYPE html PUBLIC
+      "-//W3C//DTD XHTML 1.0 Strict//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- ;;**;; Big Picture (MARS)  is copyright 2013 Chickasaw Nation Sovereign Technology Solutions, LLC -->
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<script type="text/javascript" src="marsjs/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="marsjs/fixheadertable/javascript/jquery.fixheadertableALTERED.js"></script>
+<script type="text/javascript" src="marsjs/jquery-ui/jquery-ui-1_10_4_custom/js/jquery-ui-1.10.4.custom.min.js"></script>
+<script type="text/javascript" src="marsjs/tablesorter/jquery.tablesorter.min.js"></script>
+<link rel="stylesheet" type="text/css" href="marsjs/fixheadertable/css/base.css"/>
+<link rel="stylesheet" type="text/css" href="marsjs/jquery-ui/css/smoothness/jquery-ui-1.10.4.custom.css"/> 
+<link rel="stylesheet" type="text/css" href="marsjs/BGCSS/white.css?ver=2"/>  <!--
+<link rel="stylesheet" type="text/css" href="#(%session.Data("Theme"))#"/> 
+<link rel="stylesheet" type="text/css" href="#(%session.Data("Color"))#"/>    -->
+
+<style> 
+html, body{
+    height: 100%;
+}
+td{
+    font-size:small;    
+}
+th{
+    font-size:small;
+}
+.content{
+    display:none;
+    margin-left:auto;
+    margin-right:auto;
+    width:1110px;       
+}
+.loading{
+    position:absolute; 
+    top:50%;
+    left: 50%;  
+}
+</style>
+
+<script type="text/javascript">
+   $(document).ready(function() {
+       $(".content").fadeIn();
+       $(".loading").fadeOut();
+       adjustSize();
+   });
+</script>
+
+<title> MARSRVU2 </title>
+    <CSP:class super="%CSP.Page,MARSUtil.MARSUtil">   
+</head>
+
+<body onresize="adjustSize();">
+
+<script language="Cache" runat = server>
+    ;;**;; MARS is copyright 2013 Chickasaw Nation Sovereign Technology Solutions, LLC
+    Q:..marsUpd()="Y"
+    I $D(%session.Data("MARSDUZ")) D ACC1^MARS(%session.Data("MARSDUZ")) 
+    E  D ACC^MARS($S(%session.Username="UnknownUser":%session.Data("MARSDUZ"),1:%session.Username))
+    I '$D(MARSACC("MARSADM"))&('$D(MARSACC("MARSPCC"))) W ..marsKeys() Q
+</script>  
+
+<div class="loading">
+    <center>
+    <img src="marsjs/images/ajax_loader_48.gif">
+    <br>
+    <b>LOADING...</b>
+    </center>
+</div>
+
+<div class="content" align="center">
+ 
+<script language="cache" runat=server>
+S U="^"
+S MARSADJRATE=0  I $P(^MARS(10001003,1,0),U,6)'="" 
+S MARSADJRATE=$P(^MARS(10001003,1,0),U,6)
+S MARSMY=%request.Get("MARSMY")
+S MARSFAC=%request.Get("MARSFAC")
+S MARSCPT=%request.Get("MARSCPT")
+S MARSMOD=%request.Get("MARSMOD") 
+S MARS3PF=1 I $P(^MARS(10001003,1,0),U,8)'="" S MARS3PF=$P(^MARS(10001003,1,0),U,8)
+I MARSCPT["*" S MARSAST="*" S MARSCPTI=$P(^ICPT($TR(MARSCPT,"*",""),0),U,1)
+E  S MARSAST="" S MARSCPTI=$P(^ICPT(MARSCPT,0),U,1)
+S MARSCPTNM=$P(^ICPT($TR(MARSCPT,"*",""),0),U,2)
+</script>
+
+
+<div align="left" style="display:inline-block;width:27%;">
+    <a href="MARSRVU1.CSP?MARSMY=#(MARSMY)#&MARSFAC=#(MARSFAC)#">&lt;&lt;Back</a>
+</div>
+<div align="center" style="display:inline-block;width:45%;">
+    <font size=+1.5><b> RVU by V CPT Activity 
+    <br>at #($$LOCAB^MARSUTL2(MARSFAC))# for #($E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700))#
+    <br>for #(MARSAST)##(MARSCPTI)# - #(MARSCPTNM)#</font></b> 
+</div>
+<div align="right" style="display:inline-block;width:27%;">
+    <font size=-1> updated #(..marsUpdH("NITE^MARSRVU COMPLETED"))# &nbsp; *updates nightly* </font><br><br>
+    Search Table: <input type="text" id="filterBox" onkeyup="filter();">
+</div>
+
+
+<table id="table1">
+  <thead>
+    <tr><!--
+        <th><b>Month<br> Year </b></th> 
+        <th><b>PCC Clinic<br>Stop Code </b></th> 
+        <th><b>CPT </b></th> 
+        <th><b>CPT <br>Modifier</b></th>
+        <th><b>CPT <br>Cnt</b></th>  
+        <th><b>Fee <br>Schedule #(MARS3PF)#<br> Cost</b></th>       
+        <th><b>Work <br>RVU </b></th>  
+        <th><b>Total <br> Work RVU </b></th>  
+        <th><b>MCR <br>PFS <br>Calculation </b></th>
+        <th class="noSort">Chart<br>Number</th>
+        <th class="noSort">Visit<br>Date</th>
+        <th class="noSort">IEN</br>  -->
+        <th>Provider</th>
+        <th>CPT<br>Count</th>
+        <th>Visit <br> Count</th>
+        <th>Billable <br> Visit <br> Count</th>
+        <th>Visits<br>  Not <br> Reviewed</th>
+        <th>Total <br> Patient <br> Cost</th>
+        <th>Total <br> Billable <br> Cost</th>
+        <th>Total <br>Work <br> RVU</th>
+        <th>MCR <br> PFS<br> Calc</th>
+   </tr>
+ </thead>
+ <tbody><!--
+<script language="cache" runat=server>
+I ('$D(MARSACC("MARSADM")))&('$D(MARSACC("MARSBILL")))  W ..marsKeys() Q
+E  D
+    . S U="^"
+    .I $D(^MARSRVU(MARSMY,"PRV CLN CPT",MARSPRV)) D
+    .. S MARSSROW=1 
+    .. S MARS3PF=1 I $P(^MARS(10001003,1,0),U,8)'="" S MARS3PF=$P(^MARS(10001003,1,0),U,8)
+    .. S (MARSTOTAL,MARSADJTOTAL,MARSRVUTOT,MARSRVUTOTMC,MARSFRTOT)=0       ;; SUMMARY
+    .. S MARSYR="" S MARSYR=$O(^MARSFLSH("X",MARSMY,MARSYR))
+    .. S MARSMYD=$E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700)
+    .. S rowcnt=0 S MARSXX=0
+    .. S (MARSPTOT,MARSPADJ,MARSCPT1,MARSPRVUT,MARSPRVUMC,MARSPRTOT)=0 S MARSRVU=0  ;; PROV SUMMARY
+    .. S MARSCLN="" F  S MARSCLN=$O(^MARSRVU(MARSMY,"PRV CLN CPT",MARSPRV,MARSCLN)) Q:MARSCLN=""  D
+    ... S MARSCPTI="" F  S MARSCPTI=$O(^MARSRVU(MARSMY,"PRV CLN CPT",MARSPRV,MARSCLN,MARSCPTI)) Q:MARSCPTI=""  D
+    .... S MARSPFS=0
+    .... S MARSMOD="" F  S MARSMOD=$O(^MARSRVU(MARSMY,"PRV CLN CPT",MARSPRV,MARSCLN,MARSCPTI,MARSMOD)) Q:MARSMOD=""  D
+    ..... S MARSNOPRV=""
+    ..... I MARSCPTI["*" S MARSCPT=$TR(MARSCPTI,"*","") S MARSNOPRV="*"
+    ..... E  S MARSCPT=MARSCPTI
+    ..... ;S MARSCPTII="" S MARSCPTII=$O(^ICPT("B",MARSCPT,MARSCPTII))
+    ..... S MARSCPTII=$P(^ICPT(MARSCPT,0),U,1)
+    ..... S MARSCOST=0 S MARSCOST=$$3PFEE^MARSRVU(MARSCPT)
+    ..... I MARSMOD=0 S MARSMODI=""
+    ..... E  S MARSMODI=MARSMOD
+    ..... S MARSX1=0 S MARSX1=$$RVUCALC^MARSRVU(MARSCPTII,MARSMY,MARSMODI) S MARSXX=MARSX1*$G(^MARSRVU(MARSMY,"PRV CLN CPT",MARSPRV,MARSCLN,MARSCPTI,MARSMOD))
+    ..... S MARSXXT=0 S MARSXXT=(+$G(^MARSRVU(MARSMY,"PRV CLN CPT",MARSPRV,MARSCLN,MARSCPTI,MARSMOD))*MARSXX)  ;; WORK RVU
+    ..... S MARSXX1=0 ;I $D(^MARSRVU("MY-RVU-CALC",MARSYR,MARSMY,MARSPRV,MARSCLN,MARSCPT)) S MARSXXT=$P(^MARSRVU("MY-RVU-CALC",MARSYR,MARSMY,MARSPRV,MARSCLN,MARSCPT),U,3)
+    ..... S MARSXX1=0 ;$$PFS^MARSRVU(MARSCPT,MARSMY,MARSX1,$P(^MARSFLSH(MARSYR,MARSMY,"PROV-CLN",MARSPRV,MARSCLN,MARSCPT),U,1))
+    ..... S MARSPFS=$$PFS^MARSRVU(MARSCPT,MARSMY,MARSMODI,+$G(^MARSRVU(MARSMY,"PRV CLN CPT",MARSPRV,MARSCLN,MARSCPTI,MARSMOD)))
+    ..... &html<<tr class="header" id="srow#(MARSSROW)#">
+                    <td class="btn">#($E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700))#</td>
+                    <td>#(MARSCLN)#</td>
+                    <td> #(MARSNOPRV_$P(^ICPT(MARSCPT,0),U,1))# - #($P(^ICPT(MARSCPT,0),U,2))# </td> 
+                    <td><center> #(MARSMODI)# </center></td> 
+                    <td><center> #(+$G(^MARSRVU(MARSMY,"PRV CLN CPT",MARSPRV,MARSCLN,MARSCPTI,MARSMOD)))# </center></td> 
+                    <td><div align="right"> #($FN(+$G(^MARSRVU(MARSMY,"PRV CLN CPT",MARSPRV,MARSCLN,MARSCPTI,MARSMOD))*MARSCOST,",",2))# </div></td>
+                    <td><div align="right">#($FN(MARSX1,",",2))#</div></td>
+                    <td><div align="right">#($FN(MARSXX,",",2))#</div></td>
+                    <td><div align="right">#($FN($J($P(MARSPFS,U,2),",",2),",",2))#</div></td>
+                    <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+                </tr>>
+    ..... S MARSIEN="" F  S MARSIEN=$O(^MARSRVU(MARSMY,"PRV CLN CPT VIEN",MARSPRV,MARSCLN,MARSCPTI,MARSMOD,MARSIEN)) Q:MARSIEN=""  D
+    ...... S MARSLOC1=$P(^AUPNVSIT(MARSIEN,0),U,6) S DFN=$P(^AUPNVSIT(MARSIEN,0),U,5)
+    ...... S HRNO="undefined" I $D(^AUPNPAT(DFN,41,MARSLOC1)) S HRNO=$P(^AUPNPAT(DFN,41,MARSLOC1,0),U,2)
+    ...... S VDATE=$E($P(^AUPNVSIT(MARSIEN,0),U,1),4,5)_"/"_$E($P(^AUPNVSIT(MARSIEN,0),U,1),6,7)_"/"_($E($P(^AUPNVSIT(MARSIEN,0),U,1),1,3)+1700)
+    ...... &html<<tr class="hiddenRow expand-child">
+                    <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+                    <td><center>#(HRNO)#</center></td>
+                    <td><center>#(VDATE)#</center></td>
+                    <td><center>#(MARSIEN)#</center></td>
+                    </tr>>
+    ..... S MARSCPT1=MARSCPT1+(+$G(^MARSRVU(MARSMY,"PRV CLN CPT",MARSPRV,MARSCLN,MARSCPTI,MARSMOD)))
+    ..... S MARSSROW=MARSSROW+1
+    
+</script>-->
+<script language="cache" runat=server>
+    I ('$D(MARSACC("MARSADM")))&('$D(MARSACC("MARSBILL")))  W ..marsKeys() Q
+    E  D ;;^MARSRVU(MARSMY,"FAC CPT PRV VIEN",MARSFAC,MARSCPT,MARSMOD,MARSPROV,MARSVIEN)
+    . S (MARS1,MARS2,MARS3,MARS4,MARS5,MARS6,MARS7)=0
+    . S U="^"
+    . I $D(^MARSRVU(MARSMY,"FAC CPT PRV",MARSFAC,MARSCPT,MARSMOD)) D
+    .. I MARSCPT["*" S MARSAST="*" S MARSCPTI=$P(^ICPT($TR(MARSCPT,"*",""),0),U,1)
+    .. E  S MARSAST="" S MARSCPTI=$P(^ICPT(MARSCPT,0),U,1)
+    .. I MARSMOD=0 S MARSMODI=""
+    .. E  S MARSMODI=MARSMOD ;;RVUCALC(MARSCPT,MARSMY,MARSMOD)
+    .. ;S MARS3PFEE=$$3PFEE2^MARSRVU($TR(MARSCPT,"*",""),MARSMY) ;;STS/RVU REMOVED 2014 12 15
+    .. S MARS3PFEE=$$3PFEE2^MARSRVU($TR(MARSCPT,"*",""),MARSMY,MARSFAC) ;;STS/RVU ADDED 2014 12 15
+    .. S MARSRVU=$$RVUCALC^MARSRVU(MARSCPTI,MARSMY,MARSMODI)
+    .. S MARSPFS=$P($$PFS^MARSRVU($TR(MARSCPT,"*",""),MARSMY,MARSMODI,1),U,2)
+    .. S MARSPRV="" F  S MARSPRV=$O(^MARSRVU(MARSMY,"FAC CPT PRV",MARSFAC,MARSCPT,MARSMOD,MARSPRV)) Q:MARSPRV=""  D
+    ... S (MARSCNT,MARSCST,MARSBCST,MARSTRVU,MARSTPFS)=0
+    ... S MARSTC="" F  S MARSTC=$O(^MARSRVU(MARSMY,"FAC CPT PRV",MARSFAC,MARSCPT,MARSMOD,MARSPRV,MARSTC)) Q:MARSTC=""  D
+    .... Q:'$D(^AUPNVTC(MARSTC)) ;;STS/RVU ADDED 2014 12 22
+    .... S MARSCNT=MARSCNT+$P($G(^MARSRVU(MARSMY,"FAC CPT PRV",MARSFAC,MARSCPT,MARSMOD,MARSPRV,MARSTC)),U,1)
+    .... ;S MARSCST=MARSCST+($P($G(^MARSRVU(MARSMY,"FAC CPT PRV",MARSFAC,MARSCPT,MARSMOD,MARSPRV,MARSTC)),U,1)*$P(^BCMTCF(MARSTC,11),U,3)) ;;STS/RVU REMOVED 2014 12 15
+    .... ;S MARSBCST=MARSBCST+($P($G(^MARSRVU(MARSMY,"FAC CPT PRV",MARSFAC,MARSCPT,MARSMOD,MARSPRV,MARSTC)),U,2)*$P(^BCMTCF(MARSTC,11),U,3)) ;;STS/RVU REMOVED 2014 12 15
+    .... S MARSCST=MARSCST+($P($G(^MARSRVU(MARSMY,"FAC CPT PRV",MARSFAC,MARSCPT,MARSMOD,MARSPRV,MARSTC)),U,1)*$P(^AUPNVTC(MARSTC,0),U,6)) ;;STS/RVU ADDED 2014 12 15
+    .... S MARSBCST=MARSBCST+($P($G(^MARSRVU(MARSMY,"FAC CPT PRV",MARSFAC,MARSCPT,MARSMOD,MARSPRV,MARSTC)),U,2)*$P(^AUPNVTC(MARSTC,0),U,6)) ;;STS/RVU ADDED 2014 12 15
+    .... S MARSTRVU=MARSTRVU+($P($G(^MARSRVU(MARSMY,"FAC CPT PRV",MARSFAC,MARSCPT,MARSMOD,MARSPRV,MARSTC)),U,1)*MARSRVU)
+    .... S MARSTPFS=MARSTPFS+($P($G(^MARSRVU(MARSMY,"FAC CPT PRV",MARSFAC,MARSCPT,MARSMOD,MARSPRV,MARSTC)),U,3)*MARSPFS)
+    ... S MARSCNT=MARSCNT+$P($G(^MARSRVU(MARSMY,"FAC CPT PRV",MARSFAC,MARSCPT,MARSMOD,MARSPRV)),U,1)
+    ... S MARSCST=MARSCST+($P($G(^MARSRVU(MARSMY,"FAC CPT PRV",MARSFAC,MARSCPT,MARSMOD,MARSPRV)),U,1)*MARS3PFEE)
+    ... S MARSBCST=MARSBCST+($P($G(^MARSRVU(MARSMY,"FAC CPT PRV",MARSFAC,MARSCPT,MARSMOD,MARSPRV)),U,2)*MARS3PFEE)
+    ... S MARSTRVU=MARSTRVU+($P($G(^MARSRVU(MARSMY,"FAC CPT PRV",MARSFAC,MARSCPT,MARSMOD,MARSPRV)),U,1)*MARSRVU)
+    ... S MARSTPFS=MARSTPFS+($P($G(^MARSRVU(MARSMY,"FAC CPT PRV",MARSFAC,MARSCPT,MARSMOD,MARSPRV)),U,3)*MARSPFS)
+    ... I $D(^VA(200,MARSPRV)) S MARSPRVNM=$P(^VA(200,MARSPRV,0),U,1) 
+    ... E  S MARSPRVNM=MARSPRV
+    ... &html<<tr>
+                <td><a href="MARSRVU3.CSP?MARSMY=#(MARSMY)#&MARSPRV=#(MARSPRV)#&MARSFAC=#(MARSFAC)#&MARSCPT=#(MARSCPT)#&MARSMOD=#(MARSMOD)#">
+                    <font color="#3C69B7">#(MARSPRVNM)#</font></a></td>
+                    <td><center> #($FN(MARSCNT,","))# </center></td>
+                    <td><div align="right"> #($FN($G(^MARSRVU(MARSMY,"FAC CPT PRV VIEN",MARSFAC,MARSCPT,MARSMOD,MARSPRV)),","))# </div></td>
+                    <td><div align="right"> #($FN($G(^MARSRVU(MARSMY,"FAC CPT PRV VIEN 3P",MARSFAC,MARSCPT,MARSMOD,MARSPRV)),","))# </div></td>
+                    <td><div align="right"> #($FN($G(^MARSRVU(MARSMY,"FAC CPT PRV VIEN",MARSFAC,MARSCPT,MARSMOD,MARSPRV))-$G(^MARSRVU(MARSMY,"FAC CPT PRV VIEN R",MARSFAC,MARSCPT,MARSMOD,MARSPRV)),","))# </div></td>
+                    <td><div align="right"> #($FN(MARSCST,","))# </div></td>
+                    <td><div align="right"> #($FN(MARSBCST,",",2))#</div></td>
+                    <td><div align="right"> #($FN(MARSTRVU,",",2))#</div></td>
+                    <td><div align="right"> #($FN(MARSTPFS,",",2))# &nbsp; &nbsp; &nbsp; </div></td>
+                </tr>>     
+    ... S MARS1=MARS1+MARSCST   
+    ... S MARS2=MARS2+MARSBCST   
+    ... S MARS3=MARS3+MARSTRVU   
+    ... S MARS4=MARS4+MARSTPFS  
+    ...; S MARS5=MARS5+$G(^MARSRVU(MARSMY,"FAC CPT PRV VIEN",MARSFAC,MARSCPT,MARSMOD,MARSPRV)) ;;STS/RVU REMOVED 2014 12 12   
+    ...; S MARS6=MARS6+$G(^MARSRVU(MARSMY,"FAC CPT PRV VIEN 3P",MARSFAC,MARSCPT,MARSMOD,MARSPRV))    ;;STS/RVU REMOVED 2014 12 12
+    ...; S MARS7=MARS7+($G(^MARSRVU(MARSMY,"FAC CPT PRV VIEN",MARSFAC,MARSCPT,MARSMOD,MARSPRV))-$G(^MARSRVU(MARSMY,"FAC CPT PRV VIEN R",MARSFAC,MARSCPT,MARSMOD,MARSPRV))) ;;STS/RVU REMOVED 2014 12 12
+    .. S MARS5=+$G(^MARSRVU(MARSMY,"FAC CPT VIEN",MARSFAC,MARSCPT,MARSMOD))    ;;STS/RVU ADDED 2014 12 12
+    .. S MARS6=+$G(^MARSRVU(MARSMY,"FAC CPT VIEN 3P",MARSFAC,MARSCPT,MARSMOD))    ;;STS/RVU ADDED 2014 12 12
+    .. S MARS7=+($G(^MARSRVU(MARSMY,"FAC CPT VIEN",MARSFAC,MARSCPT,MARSMOD))-$G(^MARSRVU(MARSMY,"FAC CPT VIEN R",MARSFAC,MARSCPT,MARSMOD))) ;;STS/RVU ADDED 2014 12 12   
+    .. &html<</tbody>
+             <tfoot>
+                <tr id="tsum"> 
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td><div align="right"><b>#($FN(MARS5,","))#</b></div></td>
+                  <td><div align="right"><b>#($FN(MARS6,","))#</b></div></td>
+                  <td><div align="right"><b>#($FN(MARS7,","))#</b></div></td>
+                  <td><div align="right"><b>#($FN(MARS1,",",2))#</b></div></td>
+                  <td><div align="right"><b>#($FN(MARS2,",",2))#</b></div></td>
+                  <td><div align="right"><b>#($FN(MARS3,",",2))#</b></div></td>
+                  <td><div align="right"><b>#($FN(MARS4,",",2))# &nbsp; &nbsp; &nbsp; </b></div></td>
+             </tr>>
+</script>
+</tfoot>
+</table>
+* NO encounter provider was entered and credit of RVU is going to the ordering provider, if present. 
+<br>If not present, credit of the RVU will be assigned to the primary provider of the visit.
+</div>
+<script type="text/javascript">
+$("#table1 > tbody > tr").addClass("filterRow");
+
+$("#filterBox").bind("keypress", function (e) {
+    if (e.keyCode == 13) {
+       e.preventDefault();
+    }
+});
+
+function filter(){
+    
+    var string = document.getElementById('filterBox').value;
+    //var regex = "([*, >]|^)" + string;
+    
+    var regex = "([^a-zA-z0-9]|^)" + string;
+    var regexa = new RegExp(regex,"i");
+    
+    if ( string.length != 0){       
+        $(".filterRow").hide();
+            
+        $("#table1 > tfoot").hide();
+        
+        $(".filterRow td").filter(function(){
+            return $(this).text().match(regexa);        
+        }).parent().show();     
+        
+        
+    }
+    else{
+        $(".filterRow").show();             
+        $("#table1 > tfoot").show();
+    }
+}
+// addition of parser to tablesorter to correctly sort numbers with commas
+jQuery.tablesorter.addParser({
+  id: "formattedNumbers",
+  is: function(s) {
+    return /^[0-9]?[0-9,\.]*$/.test(s);
+  },
+  format: function(s) {
+    return jQuery.tablesorter.formatFloat( s.replace(",","") );
+  },
+  type: "numeric"
+});
+
+      
+
+$("#table1").tablesorter({
+    sortList: [[0,0]],
+    headers:{
+        2:{ sorter: "formattedNumbers"},
+        3:{ sorter: "formattedNumbers"},
+        4:{ sorter: "formattedNumbers"}
+    }
+});
+
+$("#table1 th").not(".noSort").hover(
+    function() {
+        
+        $(this).addClass("ui-state-hover");
+    },
+    function() {
+        $(this).removeClass("ui-state-hover");
+    }
+);
+
+
+$("table th").each(function(){
+    
+    $(this).addClass("ui-widget-header");
+    
+    });
+$("table td").each(function(){
+    
+    $(this).addClass("ui-widget-content");
+        
+    });
+
+
+var showhidebtn =  $('<div style="cursor : pointer; display : inline-block; vertical-align : middle; background : none; border : none;" class="ui-state-active"><span class="ui-icon ui-icon-triangle-1-n">&nbsp;</span></div>');
+$('.btn').prepend(showhidebtn);
+
+$('.header').find('span').toggleClass('ui-icon-triangle-1-s');
+$('.hiddenRow').toggle();
+
+$('.header').click(function(){
+    
+    $(this).find('span').toggleClass('ui-icon-triangle-1-s');
+    $(this).nextUntil('.header').toggle();
+    $("#table1").closest(".body").height(474);
+    $("#table1").closest(".body").height(475);
+    $(this).toggleClass("ui-state-default")
+   
+    
+});
+
+
+$('#table1').fixheadertable({
+            colratio    :[ 280, 100, 100, 100, 100, 100, 100, 100, 120 ],
+            height      : 475,
+            width       : 1100,
+            sortable    : false,
+            resizeCol   : true,
+            showhide    : false,
+            minColWidth : 40
+}); 
+
+
+function adjustSize(){
+    if( $("body").width() < 1110 ){ 
+        $("#table1").closest(".t_fixed_header_main_wrapper").parent().width("99%");
+        
+        $(".content").width("99%");
+
+    }
+    else{
+        $("#table1").closest(".t_fixed_header_main_wrapper").parent().width("1100");
+        $(".content").width("1110");
+    }
+    
+    if( ($("body").height() - 250) < 450 ){
+        $("table").closest(".body").height( $("body").height() - 250 );     
+    }
+    else{
+        $("table").closest(".body").height(450);        
+    }
+}
+</script>
+</body>
+</html>
+]]></CSP>
+
+
+<CSP name="MARSRVU3.CSP" application="/csp/cah/" default="1"><![CDATA[
+<!DOCTYPE html PUBLIC
+      "-//W3C//DTD XHTML 1.0 Strict//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- ;;**;; Big Picture (MARS)  is copyright 2013 Chickasaw Nation Sovereign Technology Solutions, LLC -->
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<script type="text/javascript" src="marsjs/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="marsjs/fixheadertable/javascript/jquery.fixheadertableALTERED.js"></script>
+<script type="text/javascript" src="marsjs/jquery-ui/jquery-ui-1_10_4_custom/js/jquery-ui-1.10.4.custom.min.js"></script>
+<script type="text/javascript" src="marsjs/tablesorter/jquery.tablesorter.min.js"></script>
+<link rel="stylesheet" type="text/css" href="marsjs/fixheadertable/css/base.css"/>
+<link rel="stylesheet" type="text/css" href="marsjs/jquery-ui/css/smoothness/jquery-ui-1.10.4.custom.css"/> 
+<link rel="stylesheet" type="text/css" href="marsjs/BGCSS/white.css?ver=2"/>  <!--
+<link rel="stylesheet" type="text/css" href="#(%session.Data("Theme"))#"/> 
+<link rel="stylesheet" type="text/css" href="#(%session.Data("Color"))#"/>    -->
+
+<style> 
+html, body{
+    height: 100%;
+}
+td{
+    font-size:small;    
+}
+th{
+    font-size:small;
+}
+.content{
+    display:none;
+    margin-left:auto;
+    margin-right:auto;
+    width:1010px;       
+}
+.loading{
+    position:absolute; 
+    top:50%;
+    left: 50%;  
+}
+</style>
+
+<script type="text/javascript">
+   $(document).ready(function() {
+       $(".content").fadeIn();
+       $(".loading").fadeOut();
+       adjustSize();
+   });
+</script>
+
+<title> MARSRVU2 </title>
+    <CSP:class super="%CSP.Page,MARSUtil.MARSUtil">   
+</head>
+
+<body onresize="adjustSize();">
+
+<script language="Cache" runat = server>
+    ;;**;; MARS is copyright 2013 Chickasaw Nation Sovereign Technology Solutions, LLC
+    Q:..marsUpd()="Y"
+    I $D(%session.Data("MARSDUZ")) D ACC1^MARS(%session.Data("MARSDUZ")) 
+    E  D ACC^MARS($S(%session.Username="UnknownUser":%session.Data("MARSDUZ"),1:%session.Username))
+    I '$D(MARSACC("MARSADM"))&('$D(MARSACC("MARSPCC"))) W ..marsKeys() Q
+</script>  
+
+<div class="loading">
+    <center>
+    <img src="marsjs/images/ajax_loader_48.gif">
+    <br>
+    <b>LOADING...</b>
+    </center>
+</div>
+
+<div class="content" align="center">
+ 
+<script language="cache" runat=server>
+S U="^"
+S MARS3PF=1 I $P(^MARS(10001003,1,0),U,8)'="" S MARS3PF=$P(^MARS(10001003,1,0),U,8)
+S MARSADJRATE=0  I $P(^MARS(10001003,1,0),U,6)'="" 
+S MARSADJRATE=$P(^MARS(10001003,1,0),U,6)
+S MARSMY=%request.Get("MARSMY")
+S MARSFAC=%request.Get("MARSFAC")
+S MARSCPT=%request.Get("MARSCPT")
+S MARSMOD=%request.Get("MARSMOD") 
+S MARSPRV=%request.Get("MARSPRV")
+I MARSCPT["*" S MARSAST="*" S MARSCPTI=$P(^ICPT($TR(MARSCPT,"*",""),0),U,1)
+E  S MARSAST="" S MARSCPTI=$P(^ICPT(MARSCPT,0),U,1)
+S MARSCPTNM=$P(^ICPT($TR(MARSCPT,"*",""),0),U,2)
+I $D(^VA(200,MARSPRV)) S MARSPRVNM=$P(^VA(200,MARSPRV,0),U,1)
+E  S MARSPRVNM=MARSPRV
+</script>
+
+
+<div align="left" style="display:inline-block;width:27%;">
+    <a href="MARSRVU2.CSP?MARSMY=#(MARSMY)#&MARSFAC=#(MARSFAC)#&MARSCPT=#(MARSCPT)#&MARSMOD=#(MARSMOD)#">&lt;&lt;Back</a>
+</div>
+<div align="center" style="display:inline-block;width:45%;">
+    <font style="font-size:large;"><b> RVU by V CPT Activity <br>
+    at #($$LOCAB^MARSUTL2(MARSFAC))# for #($E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700))#
+    <br>for #(MARSAST)##(MARSCPTI)# - #(MARSCPTNM)# 
+    <br>for #(MARSPRVNM)#</font></b>
+</div>
+<div align="right" style="display:inline-block;width:27%;">
+    <font size=-1> updated #(..marsUpdH("NITE^MARSRVU COMPLETED"))# &nbsp; *updates nightly* </font><br><br>
+    Search Table: <input type="text" id="filterBox" onkeyup="filter();">
+</div>
+
+
+<table id="table1">
+  <thead>
+    <tr><!--
+        <th><b>Month<br> Year </b></th> 
+        <th><b>PCC Clinic<br>Stop Code </b></th> 
+        <th><b>CPT </b></th> 
+        <th><b>CPT <br>Modifier</b></th>
+        <th><b>CPT <br>Cnt</b></th>  
+        <th><b>Fee <br>Schedule #(MARS3PF)#<br> Cost</b></th>       
+        <th><b>Work <br>RVU </b></th>  
+        <th><b>Total <br> Work RVU </b></th>  
+        <th><b>MCR <br>PFS <br>Calculation </b></th>
+        <th class="noSort">Chart<br>Number</th>
+        <th class="noSort">Visit<br>Date</th>
+        <th class="noSort">IEN</br>  -->
+        <th>Chart<br>Number</th>
+        <th>Visit<br>Date</th>
+        <th>CPT<br>Count</th>        
+        <th>3P<br>Source</th>        
+        <th>Reviewed</th>
+        <th>SvcCat</br>
+        <th>VIEN</th>
+   </tr>
+ </thead>
+ <tbody><!--
+<script language="cache" runat=server>
+I ('$D(MARSACC("MARSADM")))&('$D(MARSACC("MARSBILL")))  W ..marsKeys() Q
+E  D
+    . S U="^"
+    .I $D(^MARSRVU(MARSMY,"PRV CLN CPT",MARSPRV)) D
+    .. S MARSSROW=1 
+    .. S MARS3PF=1 I $P(^MARS(10001003,1,0),U,8)'="" S MARS3PF=$P(^MARS(10001003,1,0),U,8)
+    .. S (MARSTOTAL,MARSADJTOTAL,MARSRVUTOT,MARSRVUTOTMC,MARSFRTOT)=0       ;; SUMMARY
+    .. S MARSYR="" S MARSYR=$O(^MARSFLSH("X",MARSMY,MARSYR))
+    .. S MARSMYD=$E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700)
+    .. S rowcnt=0 S MARSXX=0
+    .. S (MARSPTOT,MARSPADJ,MARSCPT1,MARSPRVUT,MARSPRVUMC,MARSPRTOT)=0 S MARSRVU=0  ;; PROV SUMMARY
+    .. S MARSCLN="" F  S MARSCLN=$O(^MARSRVU(MARSMY,"PRV CLN CPT",MARSPRV,MARSCLN)) Q:MARSCLN=""  D
+    ... S MARSCPTI="" F  S MARSCPTI=$O(^MARSRVU(MARSMY,"PRV CLN CPT",MARSPRV,MARSCLN,MARSCPTI)) Q:MARSCPTI=""  D
+    .... S MARSPFS=0
+    .... S MARSMOD="" F  S MARSMOD=$O(^MARSRVU(MARSMY,"PRV CLN CPT",MARSPRV,MARSCLN,MARSCPTI,MARSMOD)) Q:MARSMOD=""  D
+    ..... S MARSNOPRV=""
+    ..... I MARSCPTI["*" S MARSCPT=$TR(MARSCPTI,"*","") S MARSNOPRV="*"
+    ..... E  S MARSCPT=MARSCPTI
+    ..... ;S MARSCPTII="" S MARSCPTII=$O(^ICPT("B",MARSCPT,MARSCPTII))
+    ..... S MARSCPTII=$P(^ICPT(MARSCPT,0),U,1)
+    ..... S MARSCOST=0 S MARSCOST=$$3PFEE^MARSRVU(MARSCPT)
+    ..... I MARSMOD=0 S MARSMODI=""
+    ..... E  S MARSMODI=MARSMOD
+    ..... S MARSX1=0 S MARSX1=$$RVUCALC^MARSRVU(MARSCPTII,MARSMY,MARSMODI) S MARSXX=MARSX1*$G(^MARSRVU(MARSMY,"PRV CLN CPT",MARSPRV,MARSCLN,MARSCPTI,MARSMOD))
+    ..... S MARSXXT=0 S MARSXXT=(+$G(^MARSRVU(MARSMY,"PRV CLN CPT",MARSPRV,MARSCLN,MARSCPTI,MARSMOD))*MARSXX)  ;; WORK RVU
+    ..... S MARSXX1=0 ;I $D(^MARSRVU("MY-RVU-CALC",MARSYR,MARSMY,MARSPRV,MARSCLN,MARSCPT)) S MARSXXT=$P(^MARSRVU("MY-RVU-CALC",MARSYR,MARSMY,MARSPRV,MARSCLN,MARSCPT),U,3)
+    ..... S MARSXX1=0 ;$$PFS^MARSRVU(MARSCPT,MARSMY,MARSX1,$P(^MARSFLSH(MARSYR,MARSMY,"PROV-CLN",MARSPRV,MARSCLN,MARSCPT),U,1))
+    ..... S MARSPFS=$$PFS^MARSRVU(MARSCPT,MARSMY,MARSMODI,+$G(^MARSRVU(MARSMY,"PRV CLN CPT",MARSPRV,MARSCLN,MARSCPTI,MARSMOD)))
+    ..... &html<<tr class="header" id="srow#(MARSSROW)#">
+                    <td class="btn">#($E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700))#</td>
+                    <td>#(MARSCLN)#</td>
+                    <td> #(MARSNOPRV_$P(^ICPT(MARSCPT,0),U,1))# - #($P(^ICPT(MARSCPT,0),U,2))# </td> 
+                    <td><center> #(MARSMODI)# </center></td> 
+                    <td><center> #(+$G(^MARSRVU(MARSMY,"PRV CLN CPT",MARSPRV,MARSCLN,MARSCPTI,MARSMOD)))# </center></td> 
+                    <td><div align="right"> #($FN(+$G(^MARSRVU(MARSMY,"PRV CLN CPT",MARSPRV,MARSCLN,MARSCPTI,MARSMOD))*MARSCOST,",",2))# </div></td>
+                    <td><div align="right">#($FN(MARSX1,",",2))#</div></td>
+                    <td><div align="right">#($FN(MARSXX,",",2))#</div></td>
+                    <td><div align="right">#($FN($J($P(MARSPFS,U,2),",",2),",",2))#</div></td>
+                    <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+                </tr>>
+    ..... S MARSIEN="" F  S MARSIEN=$O(^MARSRVU(MARSMY,"PRV CLN CPT VIEN",MARSPRV,MARSCLN,MARSCPTI,MARSMOD,MARSIEN)) Q:MARSIEN=""  D
+    ...... S MARSLOC1=$P(^AUPNVSIT(MARSIEN,0),U,6) S DFN=$P(^AUPNVSIT(MARSIEN,0),U,5)
+    ...... S HRNO="undefined" I $D(^AUPNPAT(DFN,41,MARSLOC1)) S HRNO=$P(^AUPNPAT(DFN,41,MARSLOC1,0),U,2)
+    ...... S VDATE=$E($P(^AUPNVSIT(MARSIEN,0),U,1),4,5)_"/"_$E($P(^AUPNVSIT(MARSIEN,0),U,1),6,7)_"/"_($E($P(^AUPNVSIT(MARSIEN,0),U,1),1,3)+1700)
+    ...... &html<<tr class="hiddenRow expand-child">
+                    <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+                    <td><center>#(HRNO)#</center></td>
+                    <td><center>#(VDATE)#</center></td>
+                    <td><center>#(MARSIEN)#</center></td>
+                    </tr>>
+    ..... S MARSCPT1=MARSCPT1+(+$G(^MARSRVU(MARSMY,"PRV CLN CPT",MARSPRV,MARSCLN,MARSCPTI,MARSMOD)))
+    ..... S MARSSROW=MARSSROW+1
+    
+</script>-->
+<script language="cache" runat=server>
+    I ('$D(MARSACC("MARSADM")))&('$D(MARSACC("MARSBILL")))  W ..marsKeys() Q
+    E  D ;;^MARSRVU(MARSMY,"FAC CPT PRV VIEN",MARSFAC,MARSCPT,MARSMOD,MARSPROV,MARSVIEN)
+    . S U="^"
+    . I $D(^MARSRVU(MARSMY,"FAC CPT PRV VIEN",MARSFAC,MARSCPT,MARSMOD,MARSPRV)) D
+    .. S MARSVIEN="" F  S MARSVIEN=$O(^MARSRVU(MARSMY,"FAC CPT PRV VIEN",MARSFAC,MARSCPT,MARSMOD,MARSPRV,MARSVIEN)) Q:MARSVIEN=""  D
+    ... S VDATE=$E($P(^AUPNVSIT(MARSVIEN,0),U,1),4,5)_"/"_$E($P(^AUPNVSIT(MARSVIEN,0),U,1),6,7)_"/"_($E($P(^AUPNVSIT(MARSVIEN,0),U,1),1,3)+1700)
+    ... S MARSDT=$P(^AUPNVSIT(MARSVIEN,0),U,1)\1
+    ... S MARSPAT=$P(^AUPNVSIT(MARSVIEN,0),U,5)
+    ... S MARS3P=$$3P^MARSUTL2(MARSDT,MARSPAT)
+    ... S MARSRVWD=""
+    ... ;I "IE"[$P(^AUPNVSIT(MARSVIEN,0),U,7) S MARSRVWD="R" ;;STS/RVU REMOVED 2014 12 12
+    ... I $D(^AUPNVSIT(MARSVIEN,11)) I $P(^AUPNVSIT(MARSVIEN,11),U,11)="R" S MARSRVWD="R"
+    ... &html<<tr>
+                <td><center>#($$VHRNO^MARSUTL2(MARSVIEN))#</center></td>
+                <td><center>#(VDATE)#</center></td>
+                <td><center>#($FN(+$G(^MARSRVU(MARSMY,"FAC CPT PRV VIEN CPT",MARSFAC,MARSCPT,MARSMOD,MARSPRV,MARSVIEN)),","))#</center></td>
+                <td><center>#(MARS3P)#</center></td>
+                <td><center>#(MARSRVWD)#</center></td>              
+                <td><center>#($P(^AUPNVSIT(MARSVIEN,0),U,7))#</center></td> 
+                <td><center>#(MARSVIEN)#</center></td>
+            </tr>>
+    
+</script>
+</tfoot>
+</table>
+* NO encounter provider was entered and credit of RVU is going to the ordering provider, if present. 
+<br>If not present, credit of the RVU will be assigned to the primary provider of the visit.
+</div>
+<script type="text/javascript">
+$("#table1 > tbody > tr").addClass("filterRow");
+
+function filter(){
+    var string = document.getElementById('filterBox').value;
+    var regex = "([, *]|^)" + string;
+    
+    //var regex = "([^a-zA-z0-9]|^)" + string;
+    var regex1 = new RegExp(regex,"i");
+    
+    
+    if ( string.length != 0){
+        $(".filterRow").hide();
+        $('.header').find('span').addClass('ui-icon-triangle-1-s');
+        $('.header').removeClass('ui-state-default');
+    
+        $(".header td").filter(function(){
+            return $(this).text().match(regex1);        
+        }).parent().show();
+        
+        
+    }
+    else{    
+        $(".header").show();         
+    }   
+}
+
+
+// addition of parser to tablesorter to correctly sort numbers with commas
+jQuery.tablesorter.addParser({
+  id: "formattedNumbers",
+  is: function(s) {
+    return /^[0-9]?[0-9,\.]*$/.test(s);
+  },
+  format: function(s) {
+    return jQuery.tablesorter.formatFloat( s.replace(",","") );
+  },
+  type: "numeric"
+});
+
+      
+
+$("#table1").tablesorter({
+    headers:{
+        4:{ sorter: "formattedNumbers"},
+    }
+});
+$("#table1 th").not(".noSort").hover(
+    function() {
+        
+        $(this).addClass("ui-state-hover");
+    },
+    function() {
+        $(this).removeClass("ui-state-hover");
+    }
+);
+
+
+$("table th").each(function(){
+    
+    $(this).addClass("ui-widget-header");
+    
+    });
+$("table td").each(function(){
+    
+    $(this).addClass("ui-widget-content");
+        
+    });
+
+
+var showhidebtn =  $('<div style="cursor : pointer; display : inline-block; vertical-align : middle; background : none; border : none;" class="ui-state-active"><span class="ui-icon ui-icon-triangle-1-n">&nbsp;</span></div>');
+$('.btn').prepend(showhidebtn);
+
+$('.header').find('span').toggleClass('ui-icon-triangle-1-s');
+$('.hiddenRow').toggle();
+
+$('.header').click(function(){
+    
+    $(this).find('span').toggleClass('ui-icon-triangle-1-s');
+    $(this).nextUntil('.header').toggle();
+    $("#table1").closest(".body").height(474);
+    $("#table1").closest(".body").height(475);
+    $(this).toggleClass("ui-state-default")
+   
+    
+});
+
+
+$('#table1').fixheadertable({
+            colratio    :[ 150, 150, 150, 150, 125, 125, 150 ],
+            height      : 475,
+            width       : 1000,
+            sortable    : false,
+            resizeCol   : true,
+            showhide    : false,
+            minColWidth : 40
+}); 
+
+
+function adjustSize(){
+    if( $("body").width() < 1010 ){ 
+        $("#table1").closest(".t_fixed_header_main_wrapper").parent().width("99%");
+        
+        $(".content").width("99%");
+
+    }
+    else{
+        $("#table1").closest(".t_fixed_header_main_wrapper").parent().width("1000");
+        $(".content").width("1010");
+    }
+    
+    if( ($("body").height() - 250) < 450 ){
+        $("table").closest(".body").height( $("body").height() - 250 );     
+    }
+    else{
+        $("table").closest(".body").height(450);        
+    }
+}
+</script>
+</body>
+</html>
+]]></CSP>
+
+
+<CSP name="MARSRVUAFC.CSP" application="/csp/cah/" default="1"><![CDATA[
+<!doctype html>
+<!-- ;; STS/CN/RPF - MARSRVUAFC - tab menu ; SEP 30, 2015
+    ;; "Per copyright/trademark, this CSP may not be modified"
+    ;; 2.0;MARS;**2**;SEP 30, 2015
+    ;;**;; MARS is the RPMS namespace, 2010
+    ;;**;; Big Picture (MARS) copyright 2013 Sovereign Technology Solutions, LLC.,(STS) of the Chickasaw Nation
+    ;;**;; HealthPic copyright/trademark 2015 Sovereign Technology Solutions, LLC.,(STS) of the Chickasaw Nation
+ -->
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<script type="text/javascript" src="marsjs/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="marsjs/jquery-ui/jquery-ui-1_10_4_custom/js/jquery-ui-1.10.4.custom.min.js"></script>
+<link rel="stylesheet" type="text/css" href="marsjs/fixheadertable/css/base.css"/>
+<link rel="stylesheet" type="text/css" href="marsjs/jquery-ui/css/smoothness/jquery-ui-1.10.4.custom.css"/> 
+<link rel="stylesheet" type="text/css" href="marsjs/BGCSS/white.css?ver=2"/> 
+
+<title> MARSRVUAFC menu tab for RVU by CPT and Associated charges </title>
+<CSP:class super="%CSP.Page,MARSUtil.MARSUtil"> 
+
+<style>
+html, body {
+    height: 100%;
+    min-height: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+#content{
+    height: 100%;
+    width: 100%;    
+}
+#header{
+    display: block;
+    width: 100%;
+    background-color: #FFFFFF;
+}
+#header ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+}
+    
+#header li {
+        float: left;
+        border: 1px solid #bbb;
+        border-bottom-width: 0;
+        margin: 0;
+}
+#tabs{
+    display: inline-block;
+    vertical-align: bottom;
+}
+#logo{
+    display: inline-block;
+    width: 190px;   
+}    
+.tab {
+        text-decoration: none;
+        display: block;
+        padding: 0.24em 1em;
+        color: #00c;        
+        text-align: center;
+}
+    
+.unselected a:hover {
+        background: #ddf;
+}
+    
+.selected {
+        border-color: black;
+        background: #4682B4;
+}
+    
+.selected a {
+        position: relative;
+        top: 1px;       
+        color: #555555;
+        font-weight: bold;
+        background: #FFFFFF;
+        border-bottom-width: 2;
+        border-bottom-width: 0;
+        margin: 0;
+}
+    
+.unselected a{
+        color:black;
+        background: #eee;
+        
+}
+    
+#tabCtrl {      
+        border: 1px solid black;
+        clear: both;
+        width: 100%;
+        height: 100%;
+}
+iframe {
+    height: 100%;
+    width: 100%;
+    border:none;
+}
+
+h1 {
+    margin: 0;
+    padding: 0 0 1em 0;
+}
+
+</style>
+<script language=Cache runat=server>
+        I '$D(%session.Data("TAB")) S TAB=1
+        E  S TAB=%session.Data("TAB")
+</script>
+
+<script type="text/javascript">
+   $(document).ready(function() {
+        adjustSize();      
+   });  
+
+</script>   
+
+</head>
+
+<body onresize="adjustSize();">
+    <br>
+    <div align="right">
+        updated #(..marsPgUpd("NITE^MARSRVUBYCPT BEG;NITE^MARSRVUBYCPT CMP"))#
+    </div>
+    <div id="header" style="width:100%;background-color:#FFFFFF;">
+        <ul id="tabs">
+            <li class="selected" id="tab1"><a class="tab" href="javascript:activateTab(1)" style="display:inline-block;">RVU</a></li>
+            <script language=Cache runat=server>
+            I %session.Data("MARSDUZ")=7820!(%session.Data("MARSDUZ")=3410) D
+            . &html<<li class="unselected" id="tab2"><a class="tab" href="javascript:activateTab(2)" style="display:inline-block;">Associated Facility Charges</a></li>>
+            </script>
+            <li class="unselected" id="tab3"><a class="tab" href="javascript:activateTab(3)" style="display:inline-block;">View by Provider</a></li>
+        </ul>
+    </div>
+    
+    <div id="tabCtrl">
+      <div id="page1" align="center" style="display: block;width:100%;height:100%;border:none;">               
+        <iframe src="MARSRVUBYCPT.CSP" name="iframe1"></iframe>
+      </div>
+      
+<script language=Cache runat=server>
+ I %session.Data("MARSDUZ")=7820!(%session.Data("MARSDUZ")=3410) D
+ . &html<   <div id="page2" align="center" style="width:100%;height:100%;display: none;">
+                <iframe src="MARSAFC.CSP" name="iframe2"></iframe>
+            </div>>
+</script>
+
+      <div id="page3" align="center" style="width:100%;height:100%;display: none;">
+            <iframe src="MARSRVUPRV.CSP" name="iframe3"></iframe>
+      </div>
+    </div>
+
+<script type="text/javascript">
+$("input[type=button]").button();
+
+function activateTab(tab) {
+        
+        var tabCtrl = document.getElementById('tabCtrl');
+        var pageToActivate = document.getElementById("page" + tab);
+        var tabToActivate = document.getElementById("tab" + tab);
+        var tabs = document.getElementById('tabs');
+        
+        for (var i = 0; i < tabCtrl.childNodes.length; i++) {
+            var node = tabCtrl.childNodes[i];
+            if (node.nodeType == 1) { 
+                node.style.display = (node == pageToActivate) ? 'block' : 'none';
+                
+            }
+        }
+        for (var i = 0; i < tabs.childNodes.length; i++) {
+            var node = tabs.childNodes[i];
+            if (node.nodeType == 1) { 
+                node.className = "unselected";
+            }
+        }
+        tabToActivate.className = "selected";
+        #server(..setTab(tab))#
+        
+    } 
+    
+function adjustSize(){
+    var tabs = $("body").width() - 195;
+        
+        $("#tabs").width(tabs);
+}
+</script>    
+<script language="Cache" method="setTab" arguments="SETTAB:%String">
+    S %session.Data("TAB")=SETTAB
+</script>       
+</body>
+</html>
+
+]]></CSP>

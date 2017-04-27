@@ -1,0 +1,1100 @@
+<CSP name="MARSPCCPOV.csp" application="/csp/cah/" default="1"><![CDATA[
+<!doctype html>
+<!-- ;; STS/CN/RVU - MARSPCCPOV - display top 20 pov counts for selected month year ; FEB 05, 2016
+ 	;; 2.0;MARS;**4**; JUL 31, 2016
+ 	;; HealthPic FY 2016
+	;; "Per copyright/trademark, this CSP may not be copied, renamed or modified"
+ 	;;**;; MARS is the RPMS namespace, 2010
+ 	;;**;; Big Picture (MARS) copyright 2013 Sovereign Technology Solutions, LLC.,(STS) of the Chickasaw Nation
+ 	;;**;; HealthPic copyright/trademark 2015 Sovereign Technology Solutions, LLC.,(STS) of the Chickasaw Nation
+ -->
+
+<head>
+
+
+<script arguments="" language="Cache" method="OnPreHTTP" returntype=%Boolean>
+	;; sts/jce 2016 02 05 added
+	S MARSPGTO=0
+	I $D(%session.Data("MARSDUZ")) D ACC1^MARS(%session.Data("MARSDUZ"))
+    I '$D(%session.Data("MARSDUZ"))  D
+    . I %session.Username'="UnknownUser" D ACC^MARS(%session.Username)
+    . E  S MARSPGTO=1
+    I MARSPGTO=1 S %response.Redirect="MARSTO.CSP" Q 1
+    Q 1
+</script>
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<script type="text/javascript" src="marsjs/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="marsjs/fixheadertable/javascript/jquery.fixheadertableALTERED.js"></script>
+<script type="text/javascript" src="marsjs/jquery-ui/jquery-ui-1_10_4_custom/js/jquery-ui-1.10.4.custom.min.js"></script>
+<link rel="stylesheet" type="text/css" href="marsjs/fixheadertable/css/base.css"/>
+<link rel="stylesheet" type="text/css" href="marsjs/jquery-ui/css/smoothness/jquery-ui-1.10.4.custom.css"/> 
+<link rel="stylesheet" type="text/css" href="marsjs/BGCSS/white.css?ver=2"/>  <!--
+<link rel="stylesheet" type="text/css" href="#(%session.Data("Theme"))#"/> 
+<link rel="stylesheet" type="text/css" href="#(%session.Data("Color"))#"/>    -->
+
+<style>	
+html, body{
+	height: 90%;
+}
+td{
+	font-size: 11px;	
+}
+th{
+	font-size: 11px;
+}
+.content{
+	display:none;
+	margin-left:auto;
+	margin-right:auto;
+	width:1100px;	
+}
+.loading{
+  	position:absolute; 
+  	top:50%;
+  	left: 50%;	
+}
+.accHeader{
+  	width:	100%;
+}
+</style>
+
+<title>	Top POV counts for selected month year and location </title>
+
+<script language="cache" runat=server>
+	S MARSMY=%request.Get("MARSMY") 
+</script>
+
+<CSP:class super="%CSP.Page,MARSUtil.MARSUtil">
+<script type="text/javascript">
+
+   function rpfexpP(marsmy) {
+
+		var month = marsmy.toString().slice(3,5);
+		var year = marsmy.toString().slice(0,3);
+		var year = +year + 1700;
+		var my = month.toString() + "/" + year.toString();		
+		var duz = #(%session.Data("MARSDUZ"))#;
+
+		$(".exporting").css("display","block");
+		$(".content").css("display","none");
+		
+		var r=confirm("Export Primary POV data for " + my + "?");
+		if (r==true) {			
+
+			var fileName = #server(..expDataP(marsmy,duz))#;		  	
+		  	alert('Export is complete\nFile name is ' + fileName);
+		  	
+  		}
+  		$(".content").fadeIn();
+		$(".exporting").fadeOut();
+	}
+	function rpfexpA(marsmy) {
+
+		var month = marsmy.toString().slice(3,5);
+		var year = marsmy.toString().slice(0,3);
+		var year = +year + 1700;
+		var my = month.toString() + "/" + year.toString();		
+		var duz = #(%session.Data("MARSDUZ"))#;
+
+		$(".exporting").css("display","block");
+		$(".content").css("display","none");
+		
+		var r=confirm("Export All POV data for " + my + "?");
+		if (r==true) {			
+
+			var fileName = #server(..expDataA(marsmy,duz))#;		  	
+		  	alert('Export is complete\nFile name is ' + fileName);
+		  	
+  		}
+  		$(".content").fadeIn();
+		$(".exporting").fadeOut();
+	}
+	
+	function rpfexpI(marsmy) {
+
+		var month = marsmy.toString().slice(3,5);
+		var year = marsmy.toString().slice(0,3);
+		var year = +year + 1700;
+		var my = month.toString() + "/" + year.toString();		
+		var duz = #(%session.Data("MARSDUZ"))#;
+
+		$(".exporting").css("display","block");
+		$(".content").css("display","none");
+		
+		var r=confirm("Export Injury POV data for " + my + "?");
+		if (r==true) {			
+
+			var fileName = #server(..expDataI(marsmy,duz))#;		  	
+		  	alert('Export is complete\nFile name is ' + fileName);
+		  	
+  		}
+  		$(".content").fadeIn();
+		$(".exporting").fadeOut();
+	}
+</script>
+ 
+</head>
+
+
+<script type="text/javascript">
+   $(document).ready(function(hello) {
+
+
+	generalJavaScriptForAllPages.init();
+
+	   $(".content").fadeIn();
+	   $(".loading").fadeOut();
+	   adjustSize();
+   });
+</script>
+
+<body onresize="adjustSize();">
+
+<div class="loading">
+	<center>
+	<img src="marsjs/images/ajax_loader_48.gif">
+	<br>
+	<b>LOADING...</b>
+	</center>
+</div>
+
+<div class="content" align="center"> 
+
+<br>
+
+<div align="left" style="width:100%">
+	<a href="MARSPCC.csp">&lt;&lt; PCC Monthly Summary </a>
+</div>
+
+<br>
+<div id="accordion">
+  <h3><!--
+  	<div align="left" style="width:50%;display:inline-block;">-->
+		<div align="left" class="accHeader">
+			<b> All Purpose of Visit: for #($E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700))# </b>
+			<div class="exptbtn ui-state-active" style="position:inline;border:none;background:none;">
+     			<span class="ui-icon ui-icon-disk" onclick="rpfexpA(#(MARSMY)#);"></span>
+     		</div>
+		</div>
+	<!--
+	</div>
+	<div align="right" style="display:inline-block;width:48%;">
+		Search Table: <input type="text" class="filterBox" id="filterBox1" onkeyup="filter(1);">
+	</div>-->
+  </h3>
+  <div style="padding: 5px;">
+
+<script language="cache" runat=server>
+	
+	&html<	  <table id="table1" border=1>
+				<thead>
+				  <tr>
+					<th> Visit <br> Type </th>
+					<th> POV <br> Rank No </th>
+					<th> Visit <br> Count  </th>
+					<th> Pt <br> Count  </th>
+					<th> ICD <br> Code  </th>
+					<th> Description  </th>
+					<th> POV IEN  </th>
+				  </tr>
+				</thead>
+				<tbody>>
+	S MARSTOP=+$G(^MARS(10001003,1,"TOPCOUNTS"))
+	S MARSVT="" F  S MARSVT=$O(^MARSVPOVAS(MARSMY,MARSVT)) Q:MARSVT=""  D
+	. &html<	  <tr class="header1">
+					<td class="btn"><b> #(MARSVT)# </b></td>
+					<td> &nbsp; </td>
+					<td><div align="right"><b> #($FN($G(^MARSVPOVAS(MARSMY,MARSVT,"VIEN-CNT")),",",0))# </b></div></td> <!--;; ALL^MARSPOVA-->
+					<td><div align="right"><b> #($FN($G(^MARSVPOVAS(MARSMY,MARSVT,"ALL-UNDUP")),",",0))# </b></div></td> <!--;; ALL^MARSPOVA-->
+					<td> &nbsp; </td>
+					<td> &nbsp; </td>
+					<td> &nbsp; </td>
+				  </tr>>
+	. S MARSCNT=0
+	. S MARSRNK="" F  S MARSRNK=$O(^MARSVPOVAS(MARSMY,MARSVT,"ALL-RANK",MARSRNK)) Q:MARSRNK=""!(MARSCNT=MARSTOP)  D
+	.. S MARSPOV="" F  S MARSPOV=$O(^MARSVPOVAS(MARSMY,MARSVT,"ALL-RANK",MARSRNK,MARSPOV)) Q:MARSPOV=""!(MARSCNT=MARSTOP)  D ;; RANK^MARSPOVA
+	... S MARSCNT=MARSCNT+1
+	... S MARSPOVD=$$POVNAME^MARSUTL(MARSMY) ;; sts/rpf 3151005 add
+	... &html<	  <tr class="hiddenRow1">
+					<td>#(MARSVT)# </td>
+					<td><div align="center"> #($FN(MARSCNT,",",0))# </div></td>
+					<td><div align="right"> #($FN(+$G(^MARSVPOVAS(MARSMY,MARSVT,"POV-VIEN-CNT",MARSPOV)),",",0))# </div></td> <!--;; ALL^MARSPOVA-->
+					<td><div align="right"> #($FN(+$G(^MARSVPOVAS(MARSMY,MARSVT,"ALL-UNDUP-POV",MARSPOV)),",",0))# </div></td> <!--;; ALL^MARSPOVA-->
+					<td><div align="center">#($P(^ICD9(MARSPOV,0),"^",1))# </div></td> 
+					<td>#(MARSPOVD)# </td>
+					<td><div align="center">#(MARSPOV)# </div></td>
+				  </tr>>
+	 &html<		</tbody>
+	 		  </table>>	   
+</script>
+
+</div>
+<!--
+<br>
+
+Primary Purpose of Visit: for #($E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700))# 
+
+<br>-->
+
+	<h3><!--
+  	<div align="left" style="width:50%;display:inline-block;">-->
+		<div align="left" class="accHeader">
+			<b> Primary Purpose of Visit: for #($E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700))# </b>
+				<div class="exptbtn ui-state-active" style="position:inline;border:none;background:none;">
+     			<span class="ui-icon ui-icon-disk" onclick="rpfexpP(#(MARSMY)#);"></span>
+     		</div>
+		</div>
+	<!--
+	</div>
+	<div align="right" style="display:inline-block;width:48%;">
+		Search Table: <input type="text" class="filterBox" id="filterBox1" onkeyup="filter(1);">
+	</div>-->
+  </h3>
+  <div style="padding: 5px;">
+
+
+<script language="cache" runat=server>
+	&html<	  <table id="table2" border=1>
+				<thead>
+				  <tr>
+					<th> Visit <br> Type </th>
+					<th> POV <br> Rank No </th>
+					<th> Visit <br> Count  </th>
+					<th> Pt <br> Count  </th>
+					<th> <B>primary </b><br>ICD Code  </th>
+					<th> Description  </th>
+					<th> POV IEN  </th>
+
+				  </tr>
+				</thead>
+				<tbody>>
+	S MARSTOP=+$G(^MARS(10001003,1,"TOPCOUNTS"))
+	S MARSVT=""  F  S MARSVT=$O(^MARSVPOVPS(MARSMY,MARSVT)) Q:MARSVT=""  D
+	. &html<	  <tr class="header2">
+					<td class="btn"><b> #(MARSVT)# </b></td>
+					<td> &nbsp; </td>
+					<td><div align="right"><b> #($FN($G(^MARSVPOVPS(MARSMY,MARSVT,"VIEN-CNT")),",",0))# </b></div></td> <!-- ;; ALL^MARSPOVP -->
+					<td><div align="right"><b> #($FN($G(^MARSVPOVPS(MARSMY,MARSVT,"ALL-UNDUP")),",",0))# </b></div></td> <!-- ;; ALL^MARSPOVP -->
+					<td> &nbsp; </td>
+					<td> &nbsp; </td>
+					<td> &nbsp; </td>
+				  </tr>>
+	. S MARSCNT=0
+	. S MARSRNK="" F  S MARSRNK=$O(^MARSVPOVPS(MARSMY,MARSVT,"ALL-RANK",MARSRNK)) Q:MARSRNK=""!(MARSCNT=MARSTOP)  D ;; RANK^MARSPOVP
+	.. ; S MARSCNT=MARSCNT+1
+	.. S MARSPOV="" F  S MARSPOV=$O(^MARSVPOVPS(MARSMY,MARSVT,"ALL-RANK",MARSRNK,MARSPOV)) Q:MARSPOV=""!(MARSCNT=MARSTOP)  D
+	... S MARSCNT=MARSCNT+1
+	... S MARSPOVD=$$POVNAME^MARSUTL(MARSMY)	;; sts/rpf 3151005 added
+	... &html<	  <tr class="hiddenRow2">
+					<td><div align="center">#(MARSVT)# </div></td>
+					<td><div align="center">#($FN(MARSCNT,",",0))# </div></td>
+					<td><div align="right"> #($FN(+$G(^MARSVPOVPS(MARSMY,MARSVT,"POV-VIEN-CNT",MARSPOV)),",",0))# </div></td> <!-- ;; ALL^MARSPOVP -->
+					<td><div align="right"> #($FN(+$G(^MARSVPOVPS(MARSMY,MARSVT,"ALL-UNDUP-POV",MARSPOV)),",",0))# </div></td> <!-- ;; ALL^MARSPOVP -->
+					<td><div align="center">#($P(^ICD9(MARSPOV,0),"^",1))# </div></td>
+					<td>#(MARSPOVD)# </td>
+					<td><div align="center">#(MARSPOV)# </div></td>
+				  </tr>>
+	&html<		</tbody>
+	 		  </table>>      
+</script>
+</div>
+<!--		
+<br>
+
+Injury for #($E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700))# 
+
+<br>-->
+<h3><!--
+  	<div align="left" style="width:50%;display:inline-block;">-->
+		<div align="left" class="accHeader">
+			<b> Injuries: for #($E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700))# </b>
+				<div class="exptbtn ui-state-active" style="position:inline;border:none;background:none;">
+     			<span class="ui-icon ui-icon-disk" onclick="rpfexpI(#(MARSMY)#);"></span>
+     		</div>
+		</div>		
+	<!--
+	</div>
+	<div align="right" style="display:inline-block;width:48%;">
+		Search Table: <input type="text" class="filterBox" id="filterBox1" onkeyup="filter(1);">
+	</div>-->
+  </h3>
+  <div style="padding: 5px;">
+
+<script language="cache" runat=server>
+	&html<	  <table id="table3" border=1>
+				<thead>
+				  <tr>
+					<th> Visit <br> Type </th>
+					<th> POV <br> Rank No </th>
+					<th> Visit <br> Count  </th>
+					<th> Pt <br> Count  </th>
+					<th> <B>Injury </b><br>ICD Code  </th>
+					<th> Description  </th>
+					<th> POV IEN  </th>
+
+				  </tr>
+				</thead>
+				<tbody>>
+	S MARSTOP=+$G(^MARS(10001003,1,"TOPCOUNTS"))
+	S MARSVT=""  F  S MARSVT=$O(^MARSVPOVNJS(MARSMY,MARSVT)) Q:MARSVT=""  D
+	. &html<	  <tr class="header2">
+					<td class="btn"><b> #(MARSVT)# </b></td>
+					<td> &nbsp; </td>
+					<td><div align="right"><b> #($FN($G(^MARSVPOVNJS(MARSMY,MARSVT,"VIEN-CNT")),",",0))# </b></div></td> <!-- ;; ALL^MARSPOVNJ -->
+					<td><div align="right"><b> #($FN($G(^MARSVPOVNJS(MARSMY,MARSVT,"ALL-UNDUP")),",",0))# </b></div></td> <!-- ;; ALL^MARSPOVNJ -->
+					<td> &nbsp; </td>
+					<td> &nbsp; </td>
+					<td> &nbsp; </td>
+				  </tr>>
+	. S MARSCNT=0
+	. S MARSRNK="" F  S MARSRNK=$O(^MARSVPOVNJS(MARSMY,MARSVT,"ALL-RANK",MARSRNK)) Q:MARSRNK=""!(MARSCNT=MARSTOP)  D
+	.. ; S MARSCNT=MARSCNT+1
+	.. S MARSPOV="" F  S MARSPOV=$O(^MARSVPOVNJS(MARSMY,MARSVT,"ALL-RANK",MARSRNK,MARSPOV)) Q:MARSPOV=""!(MARSCNT=MARSTOP)  D ;; RANK^MARSPOVNJ
+	... S MARSCNT=MARSCNT+1
+	... S MARSPOVD=$$POVNAME^MARSUTL(MARSMY)	;; sts/rpf 3151005 add
+	... &html<	  <tr class="hiddenRow2">
+					<td><div align="center">#(MARSVT)# </div></td>
+					<td><div align="center">#($FN(MARSCNT,",",0))# </div></td>
+					<td><div align="right"> #($FN(+$G(^MARSVPOVNJS(MARSMY,MARSVT,"POV-VIEN-CNT",MARSPOV)),",",0))# </div></td> <!-- ;; ALL^MARSPOVNJ -->
+					<td><div align="right"> #($FN(+$G(^MARSVPOVNJS(MARSMY,MARSVT,"ALL-UNDUP-POV",MARSPOV)),",",0))# </div></td> <!-- ;; ALL^MARSPOVNJ -->
+					<td><div align="center">#($P(^ICD9(MARSPOV,0),"^",1))# </div></td>
+					<td>#(MARSPOVD)# </td>
+					<td><div align="center">#(MARSPOV)# </div></td>
+				  </tr>>
+	&html<		</tbody>
+	 		  </table>>      
+</script>
+
+</div>
+
+</div>	<!-- end of accordion	-->
+
+</div>	<!-- end of <div class="content"	-->
+		
+<script type="text/javascript">
+/* accordion setup */
+$( "#accordion" ).accordion({
+	heightStyle: "fill",
+    collapsible: true
+
+});
+
+
+$(".filterBox").click(function(){
+	var accBox = parseInt( $(this).attr("id").slice(9,10) );
+	var openBox = $( "#accordion" ).accordion( "option", "active");
+	if( activeAcc === (accBox - 1) ){
+		$( "#accordion" ).accordion({
+			animate: 0,
+  			active: accBox
+		});
+	}
+	else{
+		$( "#accordion" ).accordion({
+			animate: 200,
+  			active: accBox
+		})
+	}
+});
+var activeAcc = 0;
+
+$("#accordion").click(function(){
+	activeAcc = $( "#accordion" ).accordion( "option", "active");
+});
+
+
+$(".filterBox").mouseleave(function(){
+	
+	$( "#accordion" ).accordion({
+		animate: 200
+	});
+});
+/* end of accordion setup */
+
+$(".divider").css("border-right","2px solid black");
+
+
+var showhidebtn =  $('<div style="cursor : pointer; display : inline-block; vertical-align : middle; background : none; border : none;" class="ui-state-active"><span class="ui-icon ui-icon-triangle-1-n">&nbsp;</span></div>');
+
+$('.btn').prepend(showhidebtn);
+$('.header1').find('span').toggleClass('ui-icon-triangle-1-s');
+$('.header2').find('span').toggleClass('ui-icon-triangle-1-s');
+
+$('.hiddenRow1').toggle();
+$('.hiddenRow2').toggle();
+
+
+$('.header1').click(function(){
+	
+	if( $(this).hasClass('ui-state-default') ){
+		
+ 		$(this).find('span').addClass('ui-icon-triangle-1-s');
+   		$(this).nextUntil(".header1").hide(); 
+    	$(this).removeClass("ui-state-default");     	
+	
+ 	}
+ 	else{
+	 	$(this).find('span').removeClass('ui-icon-triangle-1-s');
+   		$(this).nextUntil(".header1").show(); 
+    	$(this).addClass("ui-state-default");
+ 	}
+   	$("#table1").closest(".body").height(theight);   	
+   	$("#table1").closest(".body").height(theight);
+   
+	
+});
+
+$('.header2').click(function(){
+	
+	
+	if( $(this).hasClass('ui-state-default') ){
+		
+ 		$(this).find('span').addClass('ui-icon-triangle-1-s');
+   		$(this).nextUntil(".header2").hide(); 
+    	$(this).removeClass("ui-state-default");     	
+	
+ 	}
+ 	else{
+	 	$(this).find('span').removeClass('ui-icon-triangle-1-s');
+   		$(this).nextUntil(".header2").show(); 
+    	$(this).addClass("ui-state-default");
+ 	}
+   	$("#table2").closest(".body").height(theight);   	
+   	$("#table2").closest(".body").height(theight);
+});
+   	
+$('.header3').click(function(){
+	
+	
+	if( $(this).hasClass('ui-state-default') ){
+		
+ 		$(this).find('span').addClass('ui-icon-triangle-1-s');
+   		$(this).nextUntil(".header3").hide(); 
+    	$(this).removeClass("ui-state-default");     	
+	
+ 	}
+ 	else{
+	 	$(this).find('span').removeClass('ui-icon-triangle-1-s');
+   		$(this).nextUntil(".header3").show(); 
+    	$(this).addClass("ui-state-default");
+ 	}
+   	$("#table3").closest(".body").height(theight);   	
+   	$("#table3").closest(".body").height(theight);
+	
+	
+});
+
+var columns = [ 100, 75, 80, 80, 80, 700, 100 ];
+
+var tableWidth = 0;
+var i;
+for( i = 0; i < columns.length; i++ ){
+	tableWidth = tableWidth + columns[i];
+}
+
+$('#table1').fixheadertable({
+	        //caption     : 'All Purpose of Visits for #($E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700))# ', // sts/rvu removed 2015 09 25
+   			colratio    : columns,
+    		height      : 475,
+    		width       : tableWidth,
+    		resizeCol	: true,
+    		minColWidth	: 30,
+    		wrapper		: false //sts/rvu added 2015 09 24
+}); 
+
+var columns2 = [ 100, 75, 80, 80, 80, 700, 100 ];
+
+var tableWidth2 = 0;
+var i;
+for( i = 0; i < columns2.length; i++ ){
+	tableWidth2 = tableWidth2 + columns2[i];
+}
+
+$('#table2').fixheadertable({
+	        //caption     : 'Primary Purpose of Visit: for #($E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700))# ', // sts/rvu removed 2015 09 25
+   			colratio    : columns2,
+    		height      : 475,
+    		width       : tableWidth2,
+    		resizeCol	: true,
+    		minColWidth	: 30,
+    		//collapsed	: true    //sts/rvu removed 2015 09 24   	 		
+    		wrapper		: false //sts/rvu added 2015 09 24
+});
+
+var columns3 = [ 100, 75, 80, 80, 80, 700, 100 ];
+
+var tableWidth3 = 0;
+var i;
+for( i = 0; i < columns3.length; i++ ){
+	tableWidth3 = tableWidth3 + columns3[i];
+}
+
+
+$('#table3').fixheadertable({
+	        //caption     : 'Injury for #($E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700))# ', // sts/rvu removed 2015 09 25
+   			colratio    : columns3,
+    		height      : 475,
+    		width       : tableWidth3,
+    		resizeCol	: true,
+    		minColWidth	: 30,
+    		//collapsed	: true   //sts/rvu removed 2015 09 24   		
+    		wrapper		: false //sts/rvu added 2015 09 24
+    		
+});
+
+if( tableWidth > tableWidth2){
+	tableWidth = tableWidth2;
+}
+if( tableWidth > tableWidth3){
+	tableWidth = tableWidth3;
+}
+
+var maxHeight = 600;
+var theight = maxHeight;
+var offsetH = 225;
+var offsetW = 13;
+var accrdOffset = 153;
+
+
+function adjustSize(){
+	if( $("body").width() < ( tableWidth + offsetW ) ){ 
+		$("table").closest(".t_fixed_header_main_wrapper").parent().width("99%");
+		$("#accordion").width( "99%" );
+		$(".content").width("99%");
+		
+	}
+	else{
+		$("table").closest(".t_fixed_header_main_wrapper").parent().width(tableWidth);
+		$(".content").width( tableWidth + offsetW );
+		$("#accordion").width( tableWidth + offsetW );
+	}	
+	
+	if( ( $("body").height() * 1.25  - offsetH ) < maxHeight ){
+		$("table").closest(".body").height( $("body").height() * 1.25 - offsetH );	
+		theight = $("body").height() * 1.25 - offsetH;	
+		$("#accordion").height(  ($("body").height() * 1.25) - offsetH + accrdOffset );
+	}
+	else{
+		$("table").closest(".body").height(maxHeight);
+		theight = maxHeight;
+		$("#accordion").height(  maxHeight + accrdOffset );	
+	}
+	
+	$("#accordion").accordion( "refresh" );
+	
+}
+</script>	
+<script language="Cache" method="expDataP" arguments=marsmy:%String,MARSDUZ:%String">
+	S MARSFILE="" ;; rpf 3160601 cpn request
+	S MARSFILE=$$EXPT^MARSVPOVP(marsmy,MARSDUZ)	
+	Q MARSFILE
+</script>
+
+<script language="Cache" method="expDataA" arguments=marsmy:%String,MARSDUZ:%String">
+	S MARSFILE="" ;; rpf 3160601 cpn request
+	S MARSFILE=$$EXPT^MARSVPOVA(marsmy,MARSDUZ)	
+	Q MARSFILE
+</script>
+
+<script language="Cache" method="expDataI" arguments=marsmy:%String,MARSDUZ:%String">
+	S MARSFILE="" ;; rpf 3160601 cpn request
+	S MARSFILE=$$EXPT^MARSVPOVNJ(marsmy,MARSDUZ)	
+	Q MARSFILE
+</script>
+
+
+
+<script type="text/javascript" src="marsjs/js/generalJavaScriptForAllPages.js"></script>
+
+<CSP:INCLUDE PAGE="GENERALCACHESCRIPTFORALLPAGES.csp">
+
+</body>
+</html>
+]]></CSP>
+
+<CSP name="MARSPCCPOV1.csp" application="/csp/cah/" default="1"><![CDATA[
+<!doctype html>
+<!-- ;; STS/CN/RVU - MARSPCCPOV1 - display top 20 pov counts for selected month year and location ; FEB 05, 2016
+ 	;; 2.0;MARS;**2**;FEB 06, 2016
+	;; "Per copyright/trademark, this CSP may not be copied, renamed or modified"
+ 	;;**;; MARS is the RPMS namespace, 2010
+ 	;;**;; Big Picture (MARS) copyright 2013 Sovereign Technology Solutions, LLC.,(STS) of the Chickasaw Nation
+ 	;;**;; HealthPic copyright/trademark 2015 Sovereign Technology Solutions, LLC.,(STS) of the Chickasaw Nation
+ -->
+<html>
+<head>
+
+
+<script arguments="" language="Cache" method="OnPreHTTP" returntype=%Boolean>
+	;; sts/jce 2016 02 05 added
+	S MARSPGTO=0
+	I $D(%session.Data("MARSDUZ")) D ACC1^MARS(%session.Data("MARSDUZ"))
+    I '$D(%session.Data("MARSDUZ"))  D
+    . I %session.Username'="UnknownUser" D ACC^MARS(%session.Username)
+    . E  S MARSPGTO=1
+    I MARSPGTO=1 S %response.Redirect="MARSTO.CSP" Q 1
+    Q 1
+</script>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<script type="text/javascript" src="marsjs/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="marsjs/fixheadertable/javascript/jquery.fixheadertableALTERED.js"></script>
+<script type="text/javascript" src="marsjs/jquery-ui/jquery-ui-1_10_4_custom/js/jquery-ui-1.10.4.custom.min.js"></script>
+<link rel="stylesheet" type="text/css" href="marsjs/fixheadertable/css/base.css"/>
+<link rel="stylesheet" type="text/css" href="marsjs/jquery-ui/css/smoothness/jquery-ui-1.10.4.custom.css"/> 
+<link rel="stylesheet" type="text/css" href="marsjs/BGCSS/white.css?ver=2"/>  <!--
+<link rel="stylesheet" type="text/css" href="#(%session.Data("Theme"))#"/> 
+<link rel="stylesheet" type="text/css" href="#(%session.Data("Color"))#"/>    -->
+
+<style>	
+html, body{
+	height: 90%;
+}
+td{
+	font-size: 11px;	
+}
+th{
+	font-size: 11px;
+}
+.content{
+	display:none;
+	margin-left:auto;
+	margin-right:auto;
+	width:1100px;	
+}
+.loading{
+  	position:absolute; 
+  	top:50%;
+  	left: 50%;	
+}
+</style>
+
+<title>	Top 20 POV Counts for selected month year and location </title>
+
+<script language="cache" runat=server>
+	;;**;; MARS is copyright 2013 Chickasaw Nation Sovereign Technology Solutions, LLC
+	Q:..marsUpd()="Y" 
+	S MARSFAC=%request.Get("MARSFAC") S MARSMY=%request.Get("MARSMY") 
+    S MARSFACI="" S MARSI=0 F  S MARSI=$O(^MARS(10001003,1,"LOC",MARSI)) Q:+MARSI=0  D
+    . I $P(^MARS(10001003,1,"LOC",MARSI,0),"^",2)=MARSFAC S MARSFACI=$P(^MARS(10001003,1,"LOC",MARSI,0),"^",1) Q
+	I MARSFACI="" D ;; sts/rvu added 2015 11 12 to handle facilities other than what are included in setup file
+	. I MARSFAC["~" S MARSFAC=$E(MARSFAC,3,$L(MARSFAC))
+	. S MARSFACI=$O(^DIC(4,"B",MARSFAC,MARSFACI))
+</script>
+<title> POV RANKINGS </title>
+<CSP:class super="%CSP.Page,MARSUtil.MARSUtil"> 
+
+<script type="text/javascript">
+   $(document).ready(function() {
+
+
+	generalJavaScriptForAllPages.init();
+
+	   $(".content").fadeIn();
+	   $(".loading").fadeOut();
+	   adjustSize();
+   });
+</script>
+
+</head>
+
+
+
+<body onresize="adjustSize();">
+
+<div class="loading">
+	<center>
+	<img src="marsjs/images/ajax_loader_48.gif">
+	<br>
+	<b>LOADING...</b>
+	</center>
+</div>
+
+<div class="content" align="center"> 
+
+<br>
+
+<div align="left" style="width:100%">
+	<a href="MARSPCC.csp">&lt;&lt; PCC Monthly Summary</a>
+</div>
+
+<!--All Purpose of Visits: #(MARSFAC)#  for #($E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700))# -->
+
+<div id="accordion">
+  <h3>
+  	<div align="left" class="accHeader">
+		<b>All Purpose of Visits: #(MARSFAC)# #(MARSFACI)#  FOR #($E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700))# </b>
+	</div>
+  </h3>
+  <div style="padding: 5px;">
+  
+	<script language="cache" runat=server>	
+	&html<	  <table id="table1" border=1>
+			  	<thead>
+				  <tr>
+					<th> Visit <br> Type </th>
+					<th> POV <br>Rank No </th>
+					<th> Visit <br> Count  </th>
+					<th> Pt <br> Count  </th>
+					<th> ICD <br> Code  </th>
+					<th> Description  </th>
+					<th> POV <br> IEN  </th>
+			  	  </tr>
+			  	</thead>
+			  	<tbody>>
+	S MARSTOP=+$G(^MARS(10001003,1,"TOPCOUNTS"))
+	S MARSVT=""  F  S MARSVT=$O(^MARSVPOVAS(MARSMY,MARSVT)) Q:MARSVT=""  D
+	. Q:MARSFACI=""
+	. Q:'$D(^MARSVPOVAS(MARSMY,MARSVT,"RANK",MARSFACI))
+	. &html<	  <tr class="header1">
+					<td class="btn"><b> #(MARSVT)# </b></td>
+					<td> &nbsp; </td>
+					<td><div align="right"><b> #($FN(+$G(^MARSVPOVAS(MARSMY,MARSVT,"LOC-VIEN-CNT",MARSFACI)),",",0))# </b></div></td>
+					<td><div align="right"><b> #($FN(+$G(^MARSVPOVAS(MARSMY,MARSVT,"UNDUP-LOC",MARSFACI)),",",0))# </b></div></td>
+					<td> &nbsp; </td>
+					<td> &nbsp; </td>
+					<td> &nbsp; </td>
+				  </tr>>
+	. S MARSCNT=0
+	. S MARSRNK="" F  S MARSRNK=$O(^MARSVPOVAS(MARSMY,MARSVT,"RANK",MARSFACI,MARSRNK)) Q:MARSRNK=""!(MARSCNT=MARSTOP)  D
+	.. S MARSPOV="" F  S MARSPOV=$O(^MARSVPOVAS(MARSMY,MARSVT,"RANK",MARSFACI,MARSRNK,MARSPOV)) Q:MARSPOV=""!(MARSCNT=MARSTOP)  D
+	... S MARSCNT=MARSCNT+1
+	... ;S MARSPOVD="" ;; sts/rpf 3151005 co
+	... ;S MARSPOVDT=MARSMY_"32" S MARSPOVDT=$O(^ICD9(MARSPOV,68,"B",MARSPOVDT),-1)  ;; sts/rpf 3151005 co
+	... ;I MARSPOVDT'="" S MARSI="" S MARSI=$O(^ICD9(MARSPOV,68,"B",MARSPOVDT,MARSI),-1)  ;; sts/rpf 3151005 co
+	... ;I MARSI'="" S MARSPOVD=$P(^ICD9(MARSPOV,68,MARSI,1),"^",1)  ;; sts/rpf 3151005 co
+	... S MARSPOVD=$$POVNAME^MARSUTL(MARSMY)
+	... &html<	  <tr class="hiddenRow1">
+					<td>#(MARSVT)# </td>
+					<td><div align="center"> #($FN(MARSCNT,",",0))# </td>
+					<td><div align="right"> #($FN(+$G(^MARSVPOVAS(MARSMY,MARSVT,"LOC-POV-VIEN-CNT",MARSFACI,MARSPOV)),",",0))# </td>
+					<td><div align="right"> #($FN(+$G(^MARSVPOVAS(MARSMY,MARSVT,"UNDUP-POV",MARSFACI,MARSPOV)),",",0))# </td>
+					<td><div align="center">#($P(^ICD9(MARSPOV,0),"^",1))# </td>
+					<td>#(MARSPOVD)# </td>
+					<td><div align="center">#(MARSPOV)# </td>
+				  </tr>>
+	&html<		</tbody>	 
+	 		</table> >    
+   </script>
+
+  </div>
+
+  <h3>
+  	<div align="left" class="accHeader">
+		<b> Primary Purpose of Visits: #(MARSFAC)#  FOR #($E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700))# </b>
+	</div>
+  </h3>
+  <div style="padding: 5px;">
+
+	<script language="cache" runat=server>
+	&html<		  <table id="table2" border=1>
+					<thead>
+				  	  <tr>
+					<th> Visit <br> Type </th>
+					<th> POV <br>Rank No </th>
+					<th> Visit <br> Count  </th>
+					<th> Pt <br> Count  </th>
+					<th> ICD <br> Code  </th>
+					<th> Description  </th>
+					<th> POV <br> IEN  </th>
+				  	  </tr>
+				  	</thead>
+				  	<tbody>>
+	S MARSTOP=+$G(^MARS(10001003,1,"TOPCOUNTS"))
+	S MARSVT=""  F  S MARSVT=$O(^MARSVPOVPS(MARSMY,MARSVT)) Q:MARSVT=""  D
+	. Q:'$D(^MARSVPOVPS(MARSMY,MARSVT,"RANK",MARSFACI))
+	. &html<	  	  <tr class="header2">
+						<td class="btn"><b> #(MARSVT)# </b></td>
+						<td> &nbsp; </td>
+						<td><div align="right"><b> #($FN(+$G(^MARSVPOVPS(MARSMY,MARSVT,"LOC-VIEN-CNT",MARSFACI)),",",0))# </b></div></td>
+						<td><div align="right"><b> #($FN(+$G(^MARSVPOVPS(MARSMY,MARSVT,"UNDUP-LOC",MARSFACI)),",",0))# </b></div></td>
+						<td> &nbsp; </td>
+						<td> &nbsp; </td>
+						<td> &nbsp; </td>
+				  	  </tr>>
+	. S MARSCNT=0
+	. S MARSRNK="" F  S MARSRNK=$O(^MARSVPOVPS(MARSMY,MARSVT,"RANK",MARSFACI,MARSRNK)) Q:MARSRNK=""!(MARSCNT=MARSTOP)  D
+	.. ; S MARSCNT=MARSCNT+1
+	.. S MARSPOV="" F  S MARSPOV=$O(^MARSVPOVPS(MARSMY,MARSVT,"RANK",MARSFACI,MARSRNK,MARSPOV)) Q:MARSPOV=""!(MARSCNT=MARSTOP)  D
+	... S MARSCNT=MARSCNT+1
+	... S MARSPOVD=""
+	... S MARSPOVDT=MARSMY_"32" S MARSPOVDT=$O(^ICD9(MARSPOV,68,"B",MARSPOVDT),-1)
+	... I MARSPOVDT'="" S MARSI="" S MARSI=$O(^ICD9(MARSPOV,68,"B",MARSPOVDT,MARSI),-1)
+	... I MARSI'="" S MARSPOVD=$P(^ICD9(MARSPOV,68,MARSI,1),"^",1)
+	... &html<	  <tr class="hiddenRow2">
+				  	<td>#(MARSVT)# </td>
+					<td><div align="center"> #($FN(MARSCNT,",",0))# </td>
+					<td><div align="right"> #($FN(+$G(^MARSVPOVPS(MARSMY,MARSVT,"LOC-POV-VIEN-CNT",MARSFACI,MARSPOV)),",",0))# </td>
+					<td><div align="right"> #($FN(+$G(^MARSVPOVPS(MARSMY,MARSVT,"UNDUP-POV",MARSFACI,MARSPOV)),",",0))# </td>
+					<td><div align="center">#($P(^ICD9(MARSPOV,0),"^",1))# </td>
+					<td>#(MARSPOVD)# </td>
+					<td><div align="center">#(MARSPOV)# </td>
+				  </tr>>
+	&html<		</tbody>	 
+	 		</table> >           
+   </script>
+
+  </div>
+
+  <h3>
+  	<div align="left" class="accHeader">
+		<b> Injuries: #(MARSFAC)#  FOR #($E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700))# </b>
+	</div>	
+  </h3>
+  <div style="padding: 5px;">
+
+	<script language="cache" runat=server>
+	&html<		  <table id="table3" border=1>
+					<thead>
+				  	  <tr>
+				<th> Visit <br> Type </th>
+					<th> POV <br>Rank No </th>
+					<th> Visit <br> Count  </th>
+					<th> Pt <br> Count  </th>
+					<th> ICD <br> Code  </th>
+					<th> Description  </th>
+					<th> POV <br> IEN  </th>
+
+				  	  </tr>
+				  	</thead>
+				  	<tbody>>
+	S MARSTOP=+$G(^MARS(10001003,1,"TOPCOUNTS"))
+	S MARSVT=""  F  S MARSVT=$O(^MARSVPOVNJS(MARSMY,MARSVT)) Q:MARSVT=""  D
+	. Q:'$D(^MARSVPOVNJS(MARSMY,MARSVT,"RANK",MARSFACI))
+	. &html<	  	  <tr class="header3">
+						<td class="btn"><b> #(MARSVT)# </b></td>
+						<td> &nbsp; </td>
+						<td><div align="right"><b> #($FN(+$G(^MARSVPOVNJS(MARSMY,MARSVT,"LOC-VIEN-CNT",MARSFACI)),",",0))# </b></div></td>
+						<td><div align="right"><b> #($FN(+$G(^MARSVPOVNJS(MARSMY,MARSVT,"UNDUP-LOC",MARSFACI)),",",0))# </b></div></td>
+						<td> &nbsp; </td>
+						<td> &nbsp; </td>
+						<td> &nbsp; </td>
+				  	  </tr>>
+	. S MARSCNT=0
+	. S MARSRNK="" F  S MARSRNK=$O(^MARSVPOVNJS(MARSMY,MARSVT,"RANK",MARSFACI,MARSRNK)) Q:MARSRNK=""!(MARSCNT=MARSTOP)  D
+	.. ; S MARSCNT=MARSCNT+1
+	.. S MARSPOV="" F  S MARSPOV=$O(^MARSVPOVNJS(MARSMY,MARSVT,"RANK",MARSFACI,MARSRNK,MARSPOV)) Q:MARSPOV=""!(MARSCNT=MARSTOP)  D
+	... S MARSCNT=MARSCNT+1
+	... S MARSPOVD=""
+	... S MARSPOVDT=MARSMY_"32" S MARSPOVDT=$O(^ICD9(MARSPOV,68,"B",MARSPOVDT),-1)
+	... I MARSPOVDT'="" S MARSI="" S MARSI=$O(^ICD9(MARSPOV,68,"B",MARSPOVDT,MARSI),-1)
+	... I MARSI'="" S MARSPOVD=$P(^ICD9(MARSPOV,68,MARSI,1),"^",1)
+	... &html<	  <tr class="hiddenRow3">
+					  	<td>#(MARSVT)# </td>
+				  	<td><div align="center"> #($FN(MARSCNT,",",0))# </td>
+					<td><div align="right"> #($FN(+$G(^MARSVPOVNJS(MARSMY,MARSVT,"LOC-POV-VIEN-CNT",MARSFACI,MARSPOV)),",",0))# </td>
+					<td><div align="right"> #($FN(+$G(^MARSVPOVNJS(MARSMY,MARSVT,"UNDUP-POV",MARSFACI,MARSPOV)),",",0))# </td>
+					<td><div align="center">#($P(^ICD9(MARSPOV,0),"^",1))# </td>
+					<td>#(MARSPOVD)# </td>
+					<td><div align="center">#(MARSPOV)# </td>
+
+				  </tr>>
+	&html<		</tbody>	 
+	 		</table> >           
+   </script>
+
+  </div>
+
+</div>	<!-- end of accordion	-->
+
+</div>	<!-- end of <div class="content"	-->
+
+<script type="text/javascript">
+
+$("tbody > tr").each(function(){
+
+	$(this).children(":last").css( "padding-right", "25px")
+
+});
+
+$( "#accordion" ).accordion({
+	heightStyle: "fill",
+    collapsible: true
+
+});
+
+var showhidebtn =  $('<div style="cursor : pointer; display : inline-block; vertical-align : middle; background : none; border : none;" class="ui-state-active"><span class="ui-icon ui-icon-triangle-1-n">&nbsp;</span></div>');
+
+$('.btn').prepend(showhidebtn);
+$('.header1').find('span').toggleClass('ui-icon-triangle-1-s');
+$('.header2').find('span').toggleClass('ui-icon-triangle-1-s');
+$('.header3').find('span').toggleClass('ui-icon-triangle-1-s');
+
+$('.hiddenRow1').toggle();
+$('.hiddenRow2').toggle();
+$('.hiddenRow3').toggle();
+
+
+$('.header1').click(function(){
+	
+	if( $(this).hasClass('ui-state-default') ){
+		
+ 		$(this).find('span').addClass('ui-icon-triangle-1-s');
+   		$(this).nextUntil(".header1").hide(); 
+    	$(this).removeClass("ui-state-default");     	
+	
+ 	}
+ 	else{
+	 	$(this).find('span').removeClass('ui-icon-triangle-1-s');
+   		$(this).nextUntil(".header1").show(); 
+    	$(this).addClass("ui-state-default");
+ 	}
+   	$("#table1").closest(".body").height(theight);   	
+   	$("#table1").closest(".body").height(theight);
+   
+	
+});
+
+$('.header2').click(function(){
+	
+	
+	if( $(this).hasClass('ui-state-default') ){
+		
+ 		$(this).find('span').addClass('ui-icon-triangle-1-s');
+   		$(this).nextUntil(".header2").hide(); 
+    	$(this).removeClass("ui-state-default");     	
+	
+ 	}
+ 	else{
+	 	$(this).find('span').removeClass('ui-icon-triangle-1-s');
+   		$(this).nextUntil(".header2").show(); 
+    	$(this).addClass("ui-state-default");
+ 	}
+   	$("#table2").closest(".body").height(theight);   	
+   	$("#table2").closest(".body").height(theight);
+   	
+	
+	
+});
+
+$('.header3').click(function(){
+	
+	
+	if( $(this).hasClass('ui-state-default') ){
+		
+ 		$(this).find('span').addClass('ui-icon-triangle-1-s');
+   		$(this).nextUntil(".header3").hide(); 
+    	$(this).removeClass("ui-state-default");     	
+	
+ 	}
+ 	else{
+	 	$(this).find('span').removeClass('ui-icon-triangle-1-s');
+   		$(this).nextUntil(".header3").show(); 
+    	$(this).addClass("ui-state-default");
+ 	}
+   	$("#table3").closest(".body").height(theight);   	
+   	$("#table3").closest(".body").height(theight);
+   	
+	
+	
+});
+
+var columns = [ 100, 75, 80, 80, 80, 700, 100 ];
+
+var tableWidth = 0;
+var i;
+for( i = 0; i < columns.length; i++ ){
+	tableWidth = tableWidth + columns[i];
+}
+
+$('#table1').fixheadertable({
+	        //caption     : 'ALL PURPOSE OF VISITS: #(MARSFAC)#  FOR #($E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700))#', // sts/rvu removed 2015 09 25
+   			colratio    : columns,
+    		height      : 475,
+    		width       : tableWidth,
+    		resizeCol	: true,
+    		minColWidth	: 30,
+    		wrapper		: false //sts/rvu added 2015 09 25
+}); 
+
+var columns2 = [ 100, 75, 80, 80, 80, 700, 100 ];
+
+var tableWidth2 = 0;
+var i;
+for( i = 0; i < columns2.length; i++ ){
+	tableWidth2 = tableWidth2 + columns2[i];
+}
+
+$('#table2').fixheadertable({
+	        //caption     : 'PRIMARY PURPOSE OF VISIT #(MARSFAC)# FOR #($E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700))#', // sts/rvu removed 2015 09 25
+   			colratio    : columns2,
+    		height      : 475,
+    		width       : tableWidth2,
+    		resizeCol	: true,
+    		minColWidth	: 30,
+    		//collapsed	: true, /// sts/rvu removed 2015 09 25
+    		wrapper		: false //sts/rvu added 2015 09 25
+});
+
+var columns3 = [ 100, 75, 80, 80, 80, 700, 100 ];
+
+var tableWidth3 = 0;
+var i;
+for( i = 0; i < columns3.length; i++ ){
+	tableWidth3 = tableWidth3 + columns3[i];
+}
+
+$('#table3').fixheadertable({
+	        //caption     : 'Injuries: #(MARSFAC)#  FOR #($E(MARSMY,4,5)_"/"_($E(MARSMY,1,3)+1700))#', // sts/rvu removed 2015 09 25
+   			colratio    : columns3,
+    		height      : 475,
+    		width       : tableWidth3,
+    		resizeCol	: true,
+    		minColWidth	: 30,
+    		wrapper		: false //sts/rvu added 2015 09 25
+}); 
+
+if( tableWidth > tableWidth2){
+	tableWidth = tableWidth2;
+}
+if( tableWidth > tableWidth3){
+	tableWidth = tableWidth3;
+}
+
+var maxHeight = 600;
+var theight = maxHeight;
+var offsetH = 250;
+var offsetW = 13;
+var accrdOffset = 155;
+
+
+function adjustSize(){
+	if( $("body").width() < ( tableWidth + offsetW ) ){ 
+		$("table").closest(".t_fixed_header_main_wrapper").parent().width("99%");
+		$("#accordion").width( "99%" );
+		$(".content").width("99%");
+	}
+	else{
+		$("table").closest(".t_fixed_header_main_wrapper").parent().width(tableWidth);
+		$(".content").width( tableWidth + offsetW );
+		$("#accordion").width( tableWidth + offsetW );
+	}	
+	
+	if( ( $("body").height() * 1.25  - offsetH ) < maxHeight ){
+		$("table").closest(".body").height( $("body").height() * 1.25 - offsetH );	
+		theight = $("body").height() * 1.25 - offsetH;	
+		$("#accordion").height(  ($("body").height() * 1.25) - offsetH + accrdOffset );
+	}
+	else{
+		$("table").closest(".body").height(maxHeight);
+		theight = maxHeight;
+		$("#accordion").height(  maxHeight + accrdOffset );	
+	}
+	
+	$("#accordion").accordion( "refresh" );
+	
+}
+</script>	
+
+
+<script type="text/javascript" src="marsjs/js/generalJavaScriptForAllPages.js"></script>
+
+<CSP:INCLUDE PAGE="GENERALCACHESCRIPTFORALLPAGES.csp">
+
+</body>
+</html>
+]]></CSP>
+
+</Export>
